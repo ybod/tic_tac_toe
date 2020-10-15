@@ -1,11 +1,10 @@
 defmodule TicTacToeTest do
   use ExUnit.Case
 
-  test "works" do
-    assert 9 ==
-             TicTacToe.build_combiantions()
-             |> Enum.count()
+  test "it works" do
+    # 362880
+    # 255168
 
-    # 255 168
+    assert {362_880, _} = TicTacToe.build_combinations()
   end
 end

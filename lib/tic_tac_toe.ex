@@ -6,29 +6,42 @@ defmodule TicTacToe do
   @first_player 0
   @second_player 1
 
-  def build_combiantions do
+  def build_combinations do
     {:ok, counter_pid} = Agent.start_link(fn -> 0 end)
+    {:ok, boards_history_pid} = Agent.start_link(fn -> [] end)
+    all_fields = Enum.into(0..8, [])
+    board = :array.new(9)
 
-    Enum.each(0..8, fn cell ->
-      starting_table = :array.set(cell, @first_player, :array.new(9))
-      play_game(starting_table, @second_player, 0, counter_pid)
+    Enum.each(all_fields, fn first_field ->
+      starting_board = :array.set(first_field, @first_player, board)
+      unoccupied_fields = all_fields -- [first_field]
+
+      play_game(starting_board, @second_player, unoccupied_fields, counter_pid, boards_history_pid)
     end)
 
-    Agent.get(counter_pid, fn counter -> counter end)
+    {Agent.get(counter_pid, fn counter -> counter end),
+     Agent.get(boards_history_pid, fn boards_history -> Enum.reverse(boards_history) end)}
   end
 
-  defp play_game(table, _current_player, _position = 9, counter_pid) do
-    IO.inspect(:array.to_list(table))
+  defp play_game(board, _current_player, [], counter_pid, boards_history_pid) do
     Agent.update(counter_pid, fn counter -> counter + 1 end)
+    Agent.update(boards_history_pid, fn boards_history -> [board | boards_history] end)
   end
 
-  defp play_game(table, current_player, position, counter_pid) do
-    if :array.get(position, table) == :undefined do
-      new_table = :array.set(position, current_player, table)
-      new_player = if current_player == @first_player, do: @second_player, else: @first_player
-      play_game(new_table, new_player, position + 1, counter_pid)
-    else
-      play_game(table, current_player, position + 1, counter_pid)
-    end
+  defp play_game(board, current_player, unoccupied_fields, counter_pid, boards_history_pid) do
+    next_player = if current_player == @first_player, do: @second_player, else: @first_player
+
+    Enum.each(unoccupied_fields, fn next_field ->
+      updated_board = :array.set(next_field, current_player, board)
+      updated_unoccupied_fields = unoccupied_fields -- [next_field]
+
+      play_game(
+        updated_board,
+        next_player,
+        updated_unoccupied_fields,
+        counter_pid,
+        boards_history_pid
+      )
+    end)
   end
 end
