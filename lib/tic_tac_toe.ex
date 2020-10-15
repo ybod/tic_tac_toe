@@ -12,12 +12,15 @@ defmodule TicTacToe do
     all_fields = Enum.into(0..8, [])
     board = :array.new(9)
 
-    Enum.each(all_fields, fn first_field ->
-      starting_board = :array.set(first_field, @first_player, board)
-      unoccupied_fields = all_fields -- [first_field]
+    Enum.map(all_fields, fn first_field ->
+      Task.async(fn ->
+        starting_board = :array.set(first_field, @first_player, board)
+        unoccupied_fields = all_fields -- [first_field]
 
-      play_game(starting_board, @second_player, unoccupied_fields, counter_pid, boards_history_pid)
+        play_game(starting_board, @second_player, unoccupied_fields, counter_pid, boards_history_pid)
+      end)
     end)
+    |> Enum.map(&Task.await(&1))
 
     {Agent.get(counter_pid, fn counter -> counter end),
      Agent.get(boards_history_pid, fn boards_history -> Enum.reverse(boards_history) end)}

@@ -24,3 +24,5 @@ test-*.tar
 
 .elixir_ls
 
+boards_history.txt
+
