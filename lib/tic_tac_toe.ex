@@ -7,20 +7,28 @@ defmodule TicTacToe do
   @second_player 1
 
   def build_combiantions do
-    empty_table = [nil, nil, nil, nil, nil, nil, nil, nil, nil]
+    {:ok, counter_pid} = Agent.start_link(fn -> 0 end)
 
-    Enum.map(0..8, &play_game(List.replace_at(empty_table, &1, @first_player), @first_player, []))
+    Enum.each(0..8, fn cell ->
+      starting_table = :array.set(cell, @first_player, :array.new(9))
+      play_game(starting_table, @second_player, 0, counter_pid)
+    end)
+
+    Agent.get(counter_pid, fn counter -> counter end)
   end
 
-  defp play_game([], _, res_table), do: res_table
+  defp play_game(table, _current_player, _position = 9, counter_pid) do
+    IO.inspect(:array.to_list(table))
+    Agent.update(counter_pid, fn counter -> counter + 1 end)
+  end
 
-  defp play_game([field | rest_of_board], previous_player, new_table) do
-    if field == previous_player do
-      play_game(rest_of_board, previous_player, new_table ++ [previous_player])
+  defp play_game(table, current_player, position, counter_pid) do
+    if :array.get(position, table) == :undefined do
+      new_table = :array.set(position, current_player, table)
+      new_player = if current_player == @first_player, do: @second_player, else: @first_player
+      play_game(new_table, new_player, position + 1, counter_pid)
     else
-      new_player = if previous_player == @first_player, do: @second_player, else: @first_player
-
-      play_game(rest_of_board, new_player, new_table ++ [new_player])
+      play_game(table, current_player, position + 1, counter_pid)
     end
   end
 end
