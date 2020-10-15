@@ -38,13 +38,7 @@ defmodule TicTacToe do
       updated_board = :array.set(next_field, current_player, board)
       updated_unoccupied_fields = unoccupied_fields -- [next_field]
 
-      play_game(
-        updated_board,
-        next_player,
-        updated_unoccupied_fields,
-        counter_pid,
-        boards_history_pid
-      )
+      play_game(updated_board, next_player, updated_unoccupied_fields, counter_pid, boards_history_pid)
     end)
   end
 end
