@@ -9,4 +9,4 @@ https://archive.ics.uci.edu/ml/datasets/Tic-Tac-Toe+Endgame
 
 `mix run play_games.exs`
 
-This script will generate `all_unique_fields.txt` file with all unique game boards combinations
+This script will generate `all_unique_boards.txt` file with all unique game boards combinations

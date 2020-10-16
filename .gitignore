@@ -24,5 +24,5 @@ test-*.tar
 
 .elixir_ls
 
-all_unique_fields.txt
+all_unique_boards.txt
 
