@@ -2,11 +2,12 @@ defmodule TicTacToeTest do
   use ExUnit.Case, async: true
 
   test "it works" do
-    assert {unique_field_configurations, all_fields_configurations} = TicTacToe.try_all_combinations()
+    {games_played, unique_end_game_boards, all_unqiue_boards_configurations} = TicTacToe.try_all_combinations()
 
-    assert unique_field_configurations == 958
-    assert Enum.count(all_fields_configurations) == 958
-    refute similar_fields?(all_fields_configurations)
+    assert games_played == 255_168
+    assert unique_end_game_boards == 958
+    assert Enum.count(all_unqiue_boards_configurations) == 958
+    refute similar_fields?(all_unqiue_boards_configurations)
   end
 
   defp similar_fields?([]), do: false
