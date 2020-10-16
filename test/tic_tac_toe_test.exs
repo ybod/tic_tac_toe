@@ -2,9 +2,17 @@ defmodule TicTacToeTest do
   use ExUnit.Case, async: true
 
   test "it works" do
-    # 362880
-    # 255168
+    assert {unique_field_configurations, all_fields_configurations} = TicTacToe.try_all_combinations()
 
-    assert {362_880, _} = TicTacToe.build_combinations()
+    assert unique_field_configurations == 255_168
+    refute similar_fields?(all_fields_configurations)
+  end
+
+  defp similar_fields?([]), do: false
+
+  defp similar_fields?([h | t]) do
+    if Enum.any?(t, &(&1 === h)),
+      do: true,
+      else: similar_fields?(t)
   end
 end

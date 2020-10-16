@@ -35,8 +35,7 @@ defmodule TicTacToe do
   end
 
   defp play_game(game_field, _current_symbol, _empty_cells = [], results_ets) do
-    :ets.insert(results_ets, {game_field})
-    :ets.update_counter(results_ets, :unique_field_configurations, 1)
+    save_results(game_field, results_ets)
   end
 
   defp play_game(game_field, current_symbol, empty_cells, results_ets) do
@@ -45,10 +44,26 @@ defmodule TicTacToe do
       new_empty_cells = empty_cells -- [next_cell]
       next_symbol = get_next_symbol(current_symbol)
 
-      play_game(new_game_field, next_symbol, new_empty_cells, results_ets)
+      if five_moves_made(new_empty_cells) and GameField.win?(new_game_field) do
+        save_results(new_game_field, results_ets)
+      else
+        play_game(new_game_field, next_symbol, new_empty_cells, results_ets)
+      end
     end)
+  end
+
+  defp save_results(game_field, results_ets) do
+    :ets.insert(results_ets, {game_field})
+    :ets.update_counter(results_ets, :unique_field_configurations, 1)
   end
 
   defp get_next_symbol(@symbol_X), do: @symbol_0
   defp get_next_symbol(@symbol_0), do: @symbol_X
+
+  defp five_moves_made([_, _, _, _]), do: true
+  defp five_moves_made([_, _, _]), do: true
+  defp five_moves_made([_, _]), do: true
+  defp five_moves_made([_]), do: true
+  defp five_moves_made([]), do: true
+  defp five_moves_made(empty_cells) when is_list(empty_cells), do: false
 end

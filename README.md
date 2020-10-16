@@ -1,6 +1,6 @@
 # Tic Tac Toe
 
-Play all possible game combinations
+Play all Tic Tac Toe game combinations to find all unique fieds configuration
 
 http://www.se16.info/hgb/tictactoe.htm
 
@@ -8,4 +8,4 @@ http://www.se16.info/hgb/tictactoe.htm
 
 `mix run play_games.exs`
 
-Currenly it will calculate all possible game combinations for all players. Also all games end only when all fields are "covered"
+This will generate `all_unique_fields.txt` file with all unique fields configurations
