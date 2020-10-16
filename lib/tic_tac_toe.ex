@@ -3,42 +3,52 @@ defmodule TicTacToe do
   Play all possible Tic Tac Toe games
   """
 
-  @first_player 0
-  @second_player 1
+  alias TicTacToe.GameField
 
-  def build_combinations do
-    {:ok, counter_pid} = Agent.start_link(fn -> 0 end)
-    {:ok, boards_history_pid} = Agent.start_link(fn -> [] end)
-    all_fields = Enum.into(0..8, [])
-    board = :array.new(9)
+  @symbol_X 1
+  @symbol_0 0
 
-    Enum.map(all_fields, fn first_field ->
-      Task.async(fn ->
-        starting_board = :array.set(first_field, @first_player, board)
-        unoccupied_fields = all_fields -- [first_field]
+  # X is starting game
+  def try_all_combinations do
+    results_ets = :ets.new(__MODULE__, [:set, :public, {:write_concurrency, true}])
+    :ets.insert_new(results_ets, {:unique_field_configurations, 0})
 
-        play_game(starting_board, @second_player, unoccupied_fields, counter_pid, boards_history_pid)
-      end)
+    all_cells = Enum.to_list(0..8)
+    empty_field = GameField.new()
+
+    # Play Games
+    Task.async_stream(all_cells, fn first_cell ->
+      starting_game_field = GameField.put!(empty_field, first_cell, @symbol_X)
+      empty_cells = all_cells -- [first_cell]
+
+      play_game(starting_game_field, @symbol_0, empty_cells, results_ets)
     end)
-    |> Enum.map(&Task.await(&1))
+    |> Stream.run()
 
-    {Agent.get(counter_pid, fn counter -> counter end),
-     Agent.get(boards_history_pid, fn boards_history -> Enum.reverse(boards_history) end)}
+    # Get Results
+    [unique_field_configurations: unique_field_configurations] = :ets.lookup(results_ets, :unique_field_configurations)
+    :ets.delete(results_ets, :unique_field_configurations)
+
+    all_fields_configurations = Enum.map(:ets.tab2list(results_ets), fn {field} -> field end)
+
+    {unique_field_configurations, all_fields_configurations}
   end
 
-  defp play_game(board, _current_player, [], counter_pid, boards_history_pid) do
-    Agent.update(counter_pid, fn counter -> counter + 1 end)
-    Agent.update(boards_history_pid, fn boards_history -> [board | boards_history] end)
+  defp play_game(game_field, _current_symbol, _empty_cells = [], results_ets) do
+    :ets.insert(results_ets, {game_field})
+    :ets.update_counter(results_ets, :unique_field_configurations, 1)
   end
 
-  defp play_game(board, current_player, unoccupied_fields, counter_pid, boards_history_pid) do
-    next_player = if current_player == @first_player, do: @second_player, else: @first_player
+  defp play_game(game_field, current_symbol, empty_cells, results_ets) do
+    Enum.each(empty_cells, fn next_cell ->
+      new_game_field = GameField.put!(game_field, next_cell, current_symbol)
+      new_empty_cells = empty_cells -- [next_cell]
+      next_symbol = get_next_symbol(current_symbol)
 
-    Enum.each(unoccupied_fields, fn next_field ->
-      updated_board = :array.set(next_field, current_player, board)
-      updated_unoccupied_fields = unoccupied_fields -- [next_field]
-
-      play_game(updated_board, next_player, updated_unoccupied_fields, counter_pid, boards_history_pid)
+      play_game(new_game_field, next_symbol, new_empty_cells, results_ets)
     end)
   end
+
+  defp get_next_symbol(@symbol_X), do: @symbol_0
+  defp get_next_symbol(@symbol_0), do: @symbol_X
 end
