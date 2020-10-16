@@ -53,8 +53,9 @@ defmodule TicTacToe do
   end
 
   defp save_results(game_field, results_ets) do
-    :ets.insert(results_ets, {game_field})
-    :ets.update_counter(results_ets, :unique_field_configurations, 1)
+    if :ets.insert_new(results_ets, {game_field}) == true do
+      :ets.update_counter(results_ets, :unique_field_configurations, 1)
+    end
   end
 
   defp get_next_symbol(@symbol_X), do: @symbol_0

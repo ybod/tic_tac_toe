@@ -1,11 +1,12 @@
 # Tic Tac Toe
 
-Play all Tic Tac Toe game combinations to find all unique fieds configuration
+Play all Tic Tac Toe game move squences to find all unique end game board combinations
 
 http://www.se16.info/hgb/tictactoe.htm
+https://archive.ics.uci.edu/ml/datasets/Tic-Tac-Toe+Endgame
 
 ## Run
 
 `mix run play_games.exs`
 
-This will generate `all_unique_fields.txt` file with all unique fields configurations
+This script will generate `all_unique_fields.txt` file with all unique game boards combinations

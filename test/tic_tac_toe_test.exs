@@ -4,7 +4,8 @@ defmodule TicTacToeTest do
   test "it works" do
     assert {unique_field_configurations, all_fields_configurations} = TicTacToe.try_all_combinations()
 
-    assert unique_field_configurations == 255_168
+    assert unique_field_configurations == 958
+    assert Enum.count(all_fields_configurations) == 958
     refute similar_fields?(all_fields_configurations)
   end
 
